@@ -4,8 +4,10 @@ const NAV = [
   { id: "score", icon: "◎", label: "Score Engine" },
   { id: "taxonomy", icon: "⬡", label: "Skill Taxonomy" },
   { id: "subskills", icon: "⊹", label: "Sub-Skills" },
+  { id: "skilldna", icon: "◬", label: "Skill DNA" },
   { id: "verification", icon: "◈", label: "Verification" },
   { id: "ai", icon: "⌬", label: "AI Engine" },
+  { id: "social", icon: "⌘", label: "Social & Chat" },
   { id: "b2c", icon: "→", label: "B2C Model" },
   { id: "schema", icon: "⬕", label: "Schema" },
   { id: "flows", icon: "▣", label: "User Flows" },
@@ -547,6 +549,105 @@ const SCHEMA = {
   ],
 };
 
+
+const SKILL_DNA = {
+  title: "Skill DNA",
+  subtitle: "Open-ended skill intelligence — if you can name it, .ahead understands it",
+  concept: "The skill taxonomy covers 1000+ sub-skills, but human knowledge doesn't fit in a list. Skill DNA is the system that handles everything outside the taxonomy. When a user types any skill — no matter how niche, emerging, or custom — the platform's LLM layer understands it, scores it, maps it to related known skills, and integrates it seamlessly into the Ahead Score. No skill is left unrecognized.",
+  how_it_works: [
+    { step: "01", title: "User Types a Custom Skill", desc: "On the skill selection screen, below the taxonomy, there is a free-text input: 'Know something not listed? Type it.' The user types anything — 'Retrieval-Augmented Generation', 'Blender 3D rigging', 'Solana smart contracts', 'Reinforcement Learning from Human Feedback', 'Figma auto-layout', or even 'Prompt engineering for image models'." },
+    { step: "02", title: "LLM Semantic Understanding", desc: "The typed skill is sent to the AI layer (Claude / GPT-4o). The model identifies: what domain this skill belongs to, what level of technical depth it implies, which known taxonomy skills it is most similar to, whether it is a sub-skill of an existing skill or a standalone skill, and an estimated rarity/demand score based on training knowledge." },
+    { step: "03", title: "Auto Sub-Skill Generation", desc: "The LLM generates 5–12 contextually relevant sub-skills for the custom skill on the fly. These are not from a database — they are generated fresh, specific to what the user typed. The user then declares proficiency (Aware / Familiar / Proficient) on each generated sub-skill, exactly like the taxonomy flow." },
+    { step: "04", title: "Skill DNA Fingerprint Created", desc: "The custom skill and its sub-skills are embedded using a vector embedding model (e.g. text-embedding-3-large). This embedding becomes part of the user's Skill DNA — a high-dimensional representation of their unique knowledge profile. It is stored in pgvector." },
+    { step: "05", title: "Ahead Score Integration", desc: "The custom skill contributes to the Ahead Score exactly like any taxonomy skill — weighted by proficiency level and verification multiplier. The LLM also assigns a base_weight to the custom skill relative to demand and depth, which is used in scoring." },
+    { step: "06", title: "Verification Still Applies", desc: "All five verification methods work for custom skills too. If you type 'RLHF' and pass a quiz (AI-generated on the fly for that skill), you get the 1.0× multiplier. Link a GitHub repo demonstrating it — 1.3×. The verification pipeline is skill-agnostic." },
+    { step: "07", title: "Cross-User Aggregation", desc: "When enough users add the same custom skill (threshold: 50+ users), the platform automatically promotes it into the official taxonomy as a new verified skill. The Skill DNA system is how the taxonomy grows — crowdsourced, AI-validated, continuously expanding." },
+  ],
+  examples: [
+    { typed: "Retrieval-Augmented Generation", mapped_to: "NLP → Advanced sub-skill", generated_subs: ["Chunking strategies", "Embedding model selection", "Vector store integration", "Re-ranking techniques", "Context window management", "RAG evaluation metrics"], demand: "Very High" },
+    { typed: "Solana smart contracts", mapped_to: "Blockchain / Web3 → Solana-specific", generated_subs: ["Rust for Solana", "Anchor framework", "Account model", "PDAs (Program Derived Addresses)", "SPL tokens", "Transaction structure"], demand: "High" },
+    { typed: "Figma auto-layout", mapped_to: "UI/UX Design → Component systems", generated_subs: ["Auto-layout frames", "Constraints & resizing", "Component variants", "Design tokens", "Responsive layout logic"], demand: "Medium" },
+    { typed: "Blender geometry nodes", mapped_to: "3D / Creative Tech → Procedural generation", generated_subs: ["Node editor basics", "Procedural mesh generation", "Attribute manipulation", "Instancing", "Math nodes"], demand: "Medium" },
+  ],
+  scoring_logic: [
+    "LLM assigns a demand_score (0–1) based on how sought-after the skill is in the current tech market.",
+    "LLM assigns a depth_score (0–1) based on how technically complex the skill domain is.",
+    "base_weight = (demand_score × 0.6) + (depth_score × 0.4) — normalized to match taxonomy skill weights.",
+    "Custom skill point contribution = base_weight × proficiency_points × verification_multiplier.",
+    "Custom skills are clearly labeled in the user's profile with a ◬ DNA badge so viewers know it's self-declared and AI-understood, not taxonomy-listed.",
+    "If the skill is later promoted to the taxonomy, the badge updates automatically and the score is preserved.",
+  ],
+  dna_profile: "The union of all a user's embedded skills — taxonomy and custom — forms their Skill DNA Profile: a vector in high-dimensional space. This enables: finding users with similar skill fingerprints for friend suggestions, matching users to job descriptions by semantic skill overlap, and generating hyper-personalized roadmaps that understand not just what you know but how your knowledge cluster relates to your goal.",
+};
+
+const SOCIAL = {
+  title: "Social & Chat System",
+  subtitle: "Intentional connections, real conversations — friends only, no followers",
+  philosophy: "The social layer of .ahead is deliberately minimal and private. There is no public feed, no follower count, no likes. The only social unit is friendship — mutual, intentional, and private. This keeps the platform focused on growth, not performance.",
+  friend_system: {
+    title: "Friend System",
+    features: [
+      { name: "User Search", desc: "Search by name, college, field, or skill. Results show: name, college, field, Ahead Score, and top 3 skills. No full profile visible until friends." },
+      { name: "Friend Request", desc: "Send a friend request with an optional short note. Recipient sees: your name, college, Ahead Score, and the note. They can accept or decline." },
+      { name: "Friend List", desc: "Friends list shows each friend's: name, avatar, Ahead Score (live), current rank in their college, and their declared ultimate goal." },
+      { name: "Mutual Skill View", desc: "Once friends, you can see each other's full verified skill profile. You can compare your Ahead Score breakdowns side-by-side." },
+      { name: "Milestone Sharing", desc: "When a friend completes a roadmap phase or verifies a new skill, a notification appears in your friends panel: 'Arjun verified System Design — Advanced ◈'. Not a feed post — a private notification." },
+      { name: "Friend Limit", desc: "Free: up to 20 friends. Pro: up to 200 friends. This is intentional — quality over quantity." },
+    ],
+  },
+  chat_system: {
+    title: "Real-Time Chat",
+    architecture: "WebSocket-based (Socket.io). Each friend pair has a persistent conversation. Messages are stored in PostgreSQL and loaded on chat open. New messages are pushed via WebSocket — no polling.",
+    features: [
+      { name: "1-on-1 Chat", desc: "Private conversation between two friends. Real-time delivery via WebSocket. Typing indicators, read receipts (single tick sent, double tick read)." },
+      { name: "Message Persistence", desc: "Chat history is fully persisted in PostgreSQL. Messages load on chat open. Infinite scroll upward to load history." },
+      { name: "Resource Sharing", desc: "Inside chat, you can share a resource card directly from your library (YouTube link, book, article). It renders as a rich preview card in the conversation, not a raw link." },
+      { name: "Roadmap Milestone Share", desc: "Tap any completed roadmap milestone and share it to a friend's chat. It renders as a milestone card: skill name, phase, date completed." },
+      { name: "Skill Challenge", desc: "Send a friend a quiz challenge on any skill. They receive a notification, take the same AI-generated quiz, and results are shared back in chat: who scored higher, breakdown per question." },
+      { name: "Notifications", desc: "Push notification (in-app + browser) on new message. Badge count on chat icon in nav. Notification clears on chat open." },
+    ],
+    ui_layout: [
+      "Chat panel slides in from the right as a fixed overlay (not a new page).",
+      "Friends list on the left column of the chat panel: sorted by last message time, then online status.",
+      "Online indicator: a small white dot next to the friend's avatar if they are currently active.",
+      "Chat input at the bottom: plain text with a '+' button to attach resource cards or milestone shares.",
+      "Messages: right-aligned (you), left-aligned (them). Clean bubbles with timestamps on hover.",
+      "On mobile: chat takes full screen when open.",
+    ],
+  },
+  group_chat: {
+    title: "Group Chat",
+    desc: "Pro feature. Create a group of up to 10 friends. Groups are named by the creator and are invite-only. No public groups. Use case: study groups, project teams, competitive programming pods.",
+    features: [
+      "Group name + optional short description set at creation.",
+      "Creator can add/remove members (only from their friends list).",
+      "All group members can see each other's Ahead Score within the group header.",
+      "Leaderboard within the group: mini-leaderboard sorted by Ahead Score — competitive study group energy.",
+      "Resource sharing and milestone sharing work the same as 1-on-1 chat.",
+      "Group skill challenges: creator sends a challenge to all members simultaneously. Results appear in the group when all members complete.",
+    ],
+  },
+  privacy: [
+    "Your chat history is only visible to you and the friend you chatted with. Not to Anthropic, not to the platform admins.",
+    "Your friend list is private — other users cannot see who your friends are.",
+    "Your Ahead Score is public on the leaderboard by default, but you can set it to college-only or friends-only in settings.",
+    "You can block a user — they are removed from your friends list and cannot re-request.",
+    "You can deactivate your account — all your data is retained but your profile is hidden from search and leaderboards.",
+  ],
+  notifications: [
+    { trigger: "Friend request received", channel: "In-app + push" },
+    { trigger: "Friend request accepted", channel: "In-app" },
+    { trigger: "New message from friend", channel: "In-app + push" },
+    { trigger: "Friend verifies a new skill", channel: "In-app (friends panel)" },
+    { trigger: "Friend completes a roadmap phase", channel: "In-app (friends panel)" },
+    { trigger: "Skill challenge received", channel: "In-app + push" },
+    { trigger: "Skill challenge result ready", channel: "In-app + push" },
+    { trigger: "Your rank changes significantly (±5)", channel: "In-app" },
+    { trigger: "Daily goal reminder (if not checked in)", channel: "Push (opt-in)" },
+    { trigger: "Weekly Ahead Score summary", channel: "Email (Pro)" },
+  ],
+};
+
 const FLOWS = {
   title: "Key User Flows",
   subtitle: "The journeys that define the .ahead experience",
@@ -873,7 +974,129 @@ export default function AheadB2C() {
     </div>
   );
 
-  const renderers = { score: renderScoreEngine, taxonomy: renderTaxonomy, subskills: renderSubSkills, verification: renderVerification, ai: renderAI, b2c: renderB2C, schema: renderSchema, flows: renderFlows };
+
+  const renderSkillDNA = () => (
+    <div style={{ animation: "fadeUp 0.35s ease-out" }}>
+      <Header t={SKILL_DNA.title} s={SKILL_DNA.subtitle} />
+      <div style={{ color: "#888", fontSize: "0.85rem", lineHeight: 1.8, maxWidth: "640px", marginBottom: "2.5rem", padding: "1.25rem", border: "1px solid #1a1a1a", borderLeft: "2px solid #e8d5a3" }}>
+        {SKILL_DNA.concept}
+      </div>
+
+      <Label t="How It Works" />
+      {SKILL_DNA.how_it_works.map((s, i) => (
+        <div key={i} style={{ display: "grid", gridTemplateColumns: "40px 180px 1fr", gap: "1rem", padding: "1rem 0", borderBottom: "1px solid #111", alignItems: "start" }}>
+          <span style={{ fontFamily: "monospace", fontSize: "0.7rem", color: "#444" }}>{s.step}</span>
+          <span style={{ fontSize: "0.83rem", fontWeight: 600, color: "#e8d5a3" }}>{s.title}</span>
+          <span style={{ color: "#777", fontSize: "0.81rem", lineHeight: 1.7 }}>{s.desc}</span>
+        </div>
+      ))}
+
+      <div style={{ marginTop: "2.5rem", marginBottom: "2.5rem" }}>
+        <Label t="Live Examples — Custom Skills Typed by Users" />
+        {SKILL_DNA.examples.map((ex, i) => (
+          <div key={i} style={{ border: "1px solid #1a1a1a", marginBottom: "1rem" }}>
+            <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid #1a1a1a", background: "#0d0d0d", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <span style={{ fontFamily: "monospace", fontSize: "0.7rem", color: "#444", marginRight: "0.75rem" }}>◬ typed</span>
+                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e8d5a3" }}>"{ex.typed}"</span>
+              </div>
+              <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                <span style={{ fontSize: "0.72rem", color: "#555" }}>{ex.mapped_to}</span>
+                <span style={{ fontFamily: "monospace", fontSize: "0.7rem", color: ex.demand === "Very High" ? "#fff" : ex.demand === "High" ? "#aaa" : "#666" }}>demand: {ex.demand}</span>
+              </div>
+            </div>
+            <div style={{ padding: "0.75rem 1.25rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+              {ex.generated_subs.map((sub, j) => (
+                <span key={j} style={{ background: "#141414", border: "1px solid #222", padding: "0.25rem 0.65rem", fontSize: "0.75rem", color: "#888", fontFamily: "monospace" }}>{sub}</span>
+              ))}
+              <span style={{ fontSize: "0.7rem", color: "#333", alignSelf: "center", marginLeft: "0.25rem" }}>— AI-generated sub-skills</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Label t="Scoring Logic for Custom Skills" />
+      {SKILL_DNA.scoring_logic.map((s, i) => <Row key={i} n={`0${i+1}`} t={s} />)}
+
+      <div style={{ marginTop: "2rem", padding: "1.5rem", border: "1px solid #1a1a1a", borderLeft: "2px solid #e8d5a3" }}>
+        <div style={{ fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#555", fontFamily: "monospace", marginBottom: "0.6rem" }}>Skill DNA Profile</div>
+        <div style={{ color: "#777", fontSize: "0.83rem", lineHeight: 1.8 }}>{SKILL_DNA.dna_profile}</div>
+      </div>
+    </div>
+  );
+
+  const renderSocial = () => (
+    <div style={{ animation: "fadeUp 0.35s ease-out" }}>
+      <Header t={SOCIAL.title} s={SOCIAL.subtitle} />
+      <div style={{ color: "#888", fontSize: "0.85rem", lineHeight: 1.8, maxWidth: "620px", marginBottom: "2.5rem", padding: "1.25rem", border: "1px solid #1a1a1a", borderLeft: "2px solid #fff" }}>
+        {SOCIAL.philosophy}
+      </div>
+
+      {/* Friend System */}
+      <div style={{ marginBottom: "2.5rem" }}>
+        <Label t={SOCIAL.friend_system.title} />
+        {SOCIAL.friend_system.features.map((f, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "1.5rem", padding: "0.85rem 0", borderBottom: "1px solid #111", alignItems: "start" }}>
+            <span style={{ fontSize: "0.83rem", fontWeight: 600, color: "#ccc" }}>{f.name}</span>
+            <span style={{ color: "#666", fontSize: "0.81rem", lineHeight: 1.65 }}>{f.desc}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Chat System */}
+      <div style={{ marginBottom: "2.5rem" }}>
+        <Label t={SOCIAL.chat_system.title} />
+        <div style={{ fontFamily: "monospace", fontSize: "0.75rem", color: "#444", background: "#0d0d0d", border: "1px solid #1a1a1a", padding: "0.6rem 0.9rem", marginBottom: "1.25rem" }}>
+          Architecture: {SOCIAL.chat_system.architecture}
+        </div>
+        {SOCIAL.chat_system.features.map((f, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "1.5rem", padding: "0.85rem 0", borderBottom: "1px solid #111", alignItems: "start" }}>
+            <span style={{ fontSize: "0.83rem", fontWeight: 600, color: "#ccc" }}>{f.name}</span>
+            <span style={{ color: "#666", fontSize: "0.81rem", lineHeight: 1.65 }}>{f.desc}</span>
+          </div>
+        ))}
+        <div style={{ marginTop: "1.25rem" }}>
+          <div style={{ fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#333", fontFamily: "monospace", marginBottom: "0.75rem" }}>Chat UI Layout</div>
+          {SOCIAL.chat_system.ui_layout.map((u, i) => <Row key={i} n="—" t={u} small />)}
+        </div>
+      </div>
+
+      {/* Group Chat */}
+      <div style={{ marginBottom: "2.5rem", border: "1px solid #1a1a1a", padding: "1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+          <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>{SOCIAL.group_chat.title}</div>
+          <span style={{ fontSize: "0.68rem", border: "1px solid #e8d5a3", color: "#e8d5a3", padding: "0.15rem 0.5rem", fontFamily: "monospace" }}>Pro</span>
+        </div>
+        <div style={{ color: "#777", fontSize: "0.81rem", lineHeight: 1.7, marginBottom: "1rem" }}>{SOCIAL.group_chat.desc}</div>
+        {SOCIAL.group_chat.features.map((f, i) => <Row key={i} n="—" t={f} small />)}
+      </div>
+
+      {/* Privacy */}
+      <div style={{ marginBottom: "2.5rem" }}>
+        <Label t="Privacy Model" />
+        {SOCIAL.privacy.map((p, i) => <Row key={i} n={`0${i+1}`} t={p} />)}
+      </div>
+
+      {/* Notifications */}
+      <div>
+        <Label t="Notification System" />
+        <div style={{ border: "1px solid #1a1a1a" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 140px", padding: "0.5rem 1.25rem", borderBottom: "1px solid #1a1a1a", background: "#0d0d0d" }}>
+            <span style={{ fontSize: "0.65rem", color: "#444", fontFamily: "monospace" }}>TRIGGER</span>
+            <span style={{ fontSize: "0.65rem", color: "#444", fontFamily: "monospace" }}>CHANNEL</span>
+          </div>
+          {SOCIAL.notifications.map((n, i) => (
+            <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 140px", padding: "0.55rem 1.25rem", borderBottom: i < SOCIAL.notifications.length - 1 ? "1px solid #111" : "none", alignItems: "center" }}>
+              <span style={{ color: "#aaa", fontSize: "0.8rem" }}>{n.trigger}</span>
+              <span style={{ fontFamily: "monospace", fontSize: "0.72rem", color: "#555" }}>{n.channel}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderers = { score: renderScoreEngine, taxonomy: renderTaxonomy, subskills: renderSubSkills, skilldna: renderSkillDNA, verification: renderVerification, ai: renderAI, social: renderSocial, b2c: renderB2C, schema: renderSchema, flows: renderFlows };
 
   return (
     <div style={{ background: "#080808", minHeight: "100vh", color: "#fff", display: "flex", fontFamily: "'DM Sans', sans-serif" }}>
@@ -899,7 +1122,7 @@ export default function AheadB2C() {
           ))}
         </div>
         <div style={{ padding: "1.25rem 1.5rem", borderTop: "1px solid #111" }}>
-          <div style={{ fontSize: "0.6rem", color: "#555", fontFamily: "monospace", lineHeight: 2 }}>8 domains<br />100+ skills<br />1000+ sub-skills<br />5 verify methods</div>
+          <div style={{ fontSize: "0.6rem", color: "#555", fontFamily: "monospace", lineHeight: 2 }}>8 domains<br />100+ skills<br />1000+ sub-skills<br />5 verify methods<br />Skill DNA ◬<br />Friends + Chat</div>
         </div>
       </div>
       {/* Content */}
