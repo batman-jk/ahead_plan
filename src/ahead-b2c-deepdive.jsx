@@ -694,6 +694,7 @@ const FLOWS = {
 
 export default function AheadB2C() {
   const [active, setActive] = useState("score");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [expandedDomain, setExpandedDomain] = useState(null);
   const [expandedMethod, setExpandedMethod] = useState(null);
 
@@ -766,7 +767,7 @@ export default function AheadB2C() {
       <div style={{ color: "#888", fontSize: "0.83rem", lineHeight: 1.7, marginBottom: "2rem", maxWidth: "600px", borderLeft: "2px solid #fff", paddingLeft: "1rem" }}>{SUBSKILLS.concept}</div>
       <div style={{ marginBottom: "2.5rem" }}>
         <Label t="Proficiency Levels" />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "#1a1a1a", border: "1px solid #1a1a1a" }}>
+        <div className="resp-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "#1a1a1a", border: "1px solid #1a1a1a" }}>
           {SUBSKILLS.levels.map((l, i) => (
             <div key={i} style={{ background: "#0a0a0a", padding: "1.5rem" }}>
               <div style={{ fontWeight: 700, fontSize: "0.9rem", color: l.color, marginBottom: "0.5rem" }}>{l.level}</div>
@@ -888,7 +889,7 @@ export default function AheadB2C() {
   const renderB2C = () => (
     <div style={{ animation: "fadeUp 0.35s ease-out" }}>
       <Header t={B2C.title} s={B2C.subtitle} />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "#1a1a1a", border: "1px solid #1a1a1a", marginBottom: "2.5rem" }}>
+      <div className="resp-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "#1a1a1a", border: "1px solid #1a1a1a", marginBottom: "2.5rem" }}>
         {B2C.tiers.map((t, i) => (
           <div key={i} style={{ background: "#0a0a0a", padding: "1.75rem", borderBottom: i < 2 ? "1px solid #1a1a1a" : "none" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
@@ -945,7 +946,7 @@ export default function AheadB2C() {
             <span style={{ fontSize: "0.72rem", color: "#555" }}>{m.desc}</span>
           </div>
           {m.fields.map((f, j) => (
-            <div key={j} style={{ display: "grid", gridTemplateColumns: "160px 160px 1fr", padding: "0.5rem 1.25rem", borderBottom: j < m.fields.length - 1 ? "1px solid #111" : "none" }}>
+            <div key={j} className="resp-row" style={{ display: "grid", gridTemplateColumns: "160px 160px 1fr", padding: "0.5rem 1.25rem", borderBottom: j < m.fields.length - 1 ? "1px solid #111" : "none" }}>
               <span style={{ fontFamily: "monospace", fontSize: "0.79rem", color: "#fff" }}>{f.f}</span>
               <span style={{ fontFamily: "monospace", fontSize: "0.77rem", color: "#555" }}>{f.t}</span>
               <span style={{ fontSize: "0.76rem", color: "#3a3a3a" }}>{f.n}</span>
@@ -1098,36 +1099,430 @@ export default function AheadB2C() {
 
   const renderers = { score: renderScoreEngine, taxonomy: renderTaxonomy, subskills: renderSubSkills, skilldna: renderSkillDNA, verification: renderVerification, ai: renderAI, social: renderSocial, b2c: renderB2C, schema: renderSchema, flows: renderFlows };
 
+  const activeNav = NAV.find(n => n.id === active);
+
   return (
-    <div style={{ background: "#080808", minHeight: "100vh", color: "#fff", display: "flex", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="app-root">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-thumb { background: #1e1e1e; }
-        button:hover { opacity: 0.85; }
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #080808;
+          --bg2: #0d0d0d;
+          --border: #1a1a1a;
+          --border-faint: #111;
+          --text: #ffffff;
+          --text-muted: #aaa;
+          --text-dim: #666;
+          --text-ghost: #444;
+          --accent: #e8d5a3;
+          --sidebar-w: 220px;
+          --font-display: 'Syne', sans-serif;
+          --font-body: 'DM Sans', sans-serif;
+          --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
+        }
+
+        html, body, #root { height: 100%; }
+
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── APP ROOT ── */
+        .app-root {
+          background: var(--bg);
+          min-height: 100vh;
+          color: var(--text);
+          font-family: var(--font-body);
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* ── TOP BAR (mobile) ── */
+        .topbar {
+          display: none;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 1.25rem;
+          height: 52px;
+          border-bottom: 1px solid var(--border-faint);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: var(--bg);
+          flex-shrink: 0;
+        }
+        .topbar-logo {
+          font-family: var(--font-display);
+          font-weight: 800;
+          font-size: 1.05rem;
+          letter-spacing: -0.03em;
+        }
+        .topbar-section {
+          font-size: 0.72rem;
+          color: var(--text-muted);
+          font-family: var(--font-mono);
+        }
+        .hamburger {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--text);
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 4px;
+        }
+        .hamburger span {
+          display: block;
+          width: 20px;
+          height: 1.5px;
+          background: currentColor;
+          transition: all 0.2s;
+        }
+
+        /* ── BODY (sidebar + content) ── */
+        .app-body {
+          display: flex;
+          flex: 1;
+          min-height: 0;
+          position: relative;
+        }
+
+        /* ── SIDEBAR (desktop) ── */
+        .sidebar {
+          width: var(--sidebar-w);
+          flex-shrink: 0;
+          border-right: 1px solid var(--border-faint);
+          display: flex;
+          flex-direction: column;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow-y: auto;
+          background: var(--bg);
+          z-index: 50;
+        }
+        .sidebar-logo {
+          padding: 1.75rem 1.5rem 1.25rem;
+          border-bottom: 1px solid var(--border-faint);
+          flex-shrink: 0;
+        }
+        .sidebar-logo-name {
+          font-family: var(--font-display);
+          font-weight: 800;
+          font-size: 1.2rem;
+          letter-spacing: -0.03em;
+        }
+        .sidebar-logo-sub {
+          font-size: 0.58rem;
+          color: var(--text-ghost);
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          margin-top: 0.2rem;
+          font-family: var(--font-mono);
+        }
+        .sidebar-nav {
+          flex: 1;
+          padding: 0.5rem 0;
+          overflow-y: auto;
+        }
+        .nav-btn {
+          width: 100%;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.65rem 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.7rem;
+          text-align: left;
+          transition: all 0.12s ease;
+          border-left: 2px solid transparent;
+        }
+        .nav-btn.active {
+          color: #fff;
+          border-left-color: #fff;
+          background: rgba(255,255,255,0.03);
+        }
+        .nav-btn:not(.active) {
+          color: var(--text-muted);
+        }
+        .nav-btn:hover:not(.active) {
+          color: #ddd;
+          background: rgba(255,255,255,0.02);
+        }
+        .nav-icon { font-size: 0.75rem; flex-shrink: 0; }
+        .nav-label { font-size: 0.8rem; }
+        .nav-btn.active .nav-label { font-weight: 600; }
+        .sidebar-footer {
+          padding: 1.25rem 1.5rem;
+          border-top: 1px solid var(--border-faint);
+          flex-shrink: 0;
+        }
+        .sidebar-footer-stats {
+          font-size: 0.6rem;
+          color: #444;
+          font-family: var(--font-mono);
+          line-height: 2;
+        }
+
+        /* ── MOBILE DRAWER ── */
+        .drawer-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 200;
+          animation: fadeIn 0.2s ease;
+        }
+        .drawer-overlay.open { display: block; }
+        .drawer {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 260px;
+          height: 100vh;
+          background: var(--bg2);
+          border-right: 1px solid var(--border);
+          z-index: 210;
+          display: flex;
+          flex-direction: column;
+          animation: slideIn 0.22s ease;
+          overflow-y: auto;
+        }
+        @keyframes slideIn {
+          from { transform: translateX(-100%); }
+          to   { transform: translateX(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .drawer-header {
+          padding: 1.5rem 1.5rem 1rem;
+          border-bottom: 1px solid var(--border-faint);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .drawer-close {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--text-muted);
+          font-size: 1.2rem;
+          line-height: 1;
+          padding: 2px 6px;
+        }
+        .drawer-nav { padding: 0.5rem 0; flex: 1; }
+        .drawer-nav-btn {
+          width: 100%;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.8rem 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          color: var(--text-muted);
+          font-family: var(--font-body);
+          font-size: 0.88rem;
+          text-align: left;
+          border-left: 2px solid transparent;
+          transition: all 0.12s;
+        }
+        .drawer-nav-btn.active {
+          color: #fff;
+          border-left-color: #fff;
+          background: rgba(255,255,255,0.04);
+          font-weight: 600;
+        }
+        .drawer-nav-btn:hover:not(.active) { color: #ddd; background: rgba(255,255,255,0.02); }
+
+        /* ── BOTTOM TAB BAR (mobile) ── */
+        .bottom-tabs {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 56px;
+          background: var(--bg);
+          border-top: 1px solid var(--border-faint);
+          z-index: 100;
+          overflow-x: auto;
+          overflow-y: hidden;
+        }
+        .bottom-tabs-inner {
+          display: flex;
+          align-items: stretch;
+          height: 100%;
+          min-width: max-content;
+          padding: 0 0.5rem;
+        }
+        .tab-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0 0.75rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 3px;
+          color: var(--text-ghost);
+          min-width: 56px;
+          transition: color 0.12s;
+          border-top: 2px solid transparent;
+        }
+        .tab-btn.active { color: #fff; border-top-color: #fff; }
+        .tab-icon { font-size: 0.85rem; }
+        .tab-label { font-size: 0.55rem; font-family: var(--font-mono); white-space: nowrap; }
+
+        /* ── CONTENT AREA ── */
+        .content-area {
+          flex: 1;
+          min-width: 0;
+          overflow-y: auto;
+          height: 100vh;
+        }
+        .content-inner {
+          max-width: 860px;
+          margin: 0 auto;
+          padding: 3rem 3.5rem;
+          animation: fadeUp 0.35s ease-out;
+        }
+
+        /* ── RESPONSIVE BREAKPOINTS ── */
+
+        /* Tablet: hide sidebar, show topbar + drawer */
+        @media (max-width: 900px) {
+          .sidebar { display: none; }
+          .topbar { display: flex; }
+          .content-inner { padding: 1.75rem 1.5rem 5rem; }
+          .content-area { height: calc(100vh - 52px); }
+          .bottom-tabs { display: flex; }
+          .app-body { flex-direction: column; }
+        }
+
+        /* Mobile: tighter padding */
+        @media (max-width: 600px) {
+          .content-inner { padding: 1.25rem 1rem 5rem; }
+          .topbar { padding: 0 1rem; }
+        }
+
+        /* Wide: let content breathe more */
+        @media (min-width: 1400px) {
+          :root { --sidebar-w: 240px; }
+          .content-inner { max-width: 1000px; padding: 3.5rem 4rem; }
+        }
+
+        /* ── RESPONSIVE GRID OVERRIDES ── */
+        @media (max-width: 700px) {
+          .resp-grid-2 { grid-template-columns: 1fr !important; }
+          .resp-grid-3 { grid-template-columns: 1fr !important; }
+          .resp-row    { grid-template-columns: 1fr !important; }
+          .resp-row > *:first-child { border-bottom: 1px solid var(--border-faint); padding-bottom: 0.5rem; margin-bottom: 0.25rem; }
+        }
+
+        /* ── UTIL CLASSES ── */
+        .mono { font-family: var(--font-mono); }
+        .text-muted { color: var(--text-muted); }
+        .text-dim { color: var(--text-dim); }
+        .text-ghost { color: var(--text-ghost); }
+        .text-accent { color: var(--accent); }
       `}</style>
-      {/* Sidebar */}
-      <div style={{ width: "190px", flexShrink: 0, borderRight: "1px solid #111", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", overflowY: "auto" }}>
-        <div style={{ padding: "1.75rem 1.5rem 1.5rem", borderBottom: "1px solid #111" }}>
-          <div style={{ fontSize: "1.15rem", fontWeight: 800, letterSpacing: "-0.03em", fontFamily: "Syne, sans-serif" }}>.ahead</div>
-          <div style={{ fontSize: "0.6rem", color: "#333", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: "0.2rem", fontFamily: "monospace" }}>B2C Deep-Dive</div>
+
+      {/* ── MOBILE TOPBAR ── */}
+      <div className="topbar">
+        <div className="topbar-logo">.ahead</div>
+        <div className="topbar-section">{activeNav?.icon} {activeNav?.label}</div>
+        <button className="hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <span /><span /><span />
+        </button>
+      </div>
+
+      {/* ── MOBILE DRAWER ── */}
+      <div className={`drawer-overlay ${menuOpen ? "open" : ""}`} onClick={() => setMenuOpen(false)} />
+      {menuOpen && (
+        <div className="drawer">
+          <div className="drawer-header">
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.1rem", letterSpacing: "-0.03em" }}>.ahead</div>
+              <div style={{ fontSize: "0.58rem", color: "#444", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginTop: "2px" }}>B2C Deep-Dive</div>
+            </div>
+            <button className="drawer-close" onClick={() => setMenuOpen(false)}>✕</button>
+          </div>
+          <div className="drawer-nav">
+            {NAV.map(n => (
+              <button key={n.id} className={`drawer-nav-btn ${active === n.id ? "active" : ""}`}
+                onClick={() => { setActive(n.id); setMenuOpen(false); }}>
+                <span style={{ fontSize: "0.8rem" }}>{n.icon}</span>
+                <span>{n.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div style={{ flex: 1, padding: "0.75rem 0" }}>
-          {NAV.map((n) => (
-            <button key={n.id} onClick={() => setActive(n.id)} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "0.6rem 1.5rem", display: "flex", alignItems: "center", gap: "0.6rem", color: active === n.id ? "#fff" : "#aaa", borderLeft: active === n.id ? "1px solid #fff" : "1px solid transparent", transition: "all 0.12s" }}>
-              <span style={{ fontSize: "0.72rem" }}>{n.icon}</span>
-              <span style={{ fontSize: "0.78rem", fontWeight: active === n.id ? 600 : 400 }}>{n.label}</span>
+      )}
+
+      {/* ── APP BODY ── */}
+      <div className="app-body">
+
+        {/* ── DESKTOP SIDEBAR ── */}
+        <aside className="sidebar">
+          <div className="sidebar-logo">
+            <div className="sidebar-logo-name">.ahead</div>
+            <div className="sidebar-logo-sub">B2C Deep-Dive</div>
+          </div>
+          <nav className="sidebar-nav">
+            {NAV.map(n => (
+              <button key={n.id} className={`nav-btn ${active === n.id ? "active" : ""}`}
+                onClick={() => setActive(n.id)}>
+                <span className="nav-icon">{n.icon}</span>
+                <span className="nav-label">{n.label}</span>
+              </button>
+            ))}
+          </nav>
+          <div className="sidebar-footer">
+            <div className="sidebar-footer-stats">
+              8 domains · 100+ skills<br />
+              1000+ sub-skills · 5 verify<br />
+              Skill DNA ◬ · Friends + Chat
+            </div>
+          </div>
+        </aside>
+
+        {/* ── MAIN CONTENT ── */}
+        <main className="content-area">
+          <div className="content-inner" key={active}>
+            {renderers[active]?.()}
+          </div>
+        </main>
+      </div>
+
+      {/* ── MOBILE BOTTOM TABS ── */}
+      <div className="bottom-tabs">
+        <div className="bottom-tabs-inner">
+          {NAV.map(n => (
+            <button key={n.id} className={`tab-btn ${active === n.id ? "active" : ""}`}
+              onClick={() => setActive(n.id)}>
+              <span className="tab-icon">{n.icon}</span>
+              <span className="tab-label">{n.label}</span>
             </button>
           ))}
         </div>
-        <div style={{ padding: "1.25rem 1.5rem", borderTop: "1px solid #111" }}>
-          <div style={{ fontSize: "0.6rem", color: "#555", fontFamily: "monospace", lineHeight: 2 }}>8 domains<br />100+ skills<br />1000+ sub-skills<br />5 verify methods<br />Skill DNA ◬<br />Friends + Chat</div>
-        </div>
-      </div>
-      {/* Content */}
-      <div style={{ flex: 1, padding: "2.75rem 3rem", maxWidth: "900px", overflowY: "auto", maxHeight: "100vh" }}>
-        {renderers[active]?.()}
       </div>
     </div>
   );
@@ -1137,19 +1532,23 @@ export default function AheadB2C() {
 function Header({ t, s }) {
   return (
     <div style={{ marginBottom: "2.25rem" }}>
-      <h2 style={{ fontSize: "1.65rem", fontWeight: 700, letterSpacing: "-0.02em", fontFamily: "Syne, sans-serif", marginBottom: "0.35rem" }}>{t}</h2>
-      <p style={{ color: "#555", fontSize: "0.83rem" }}>{s}</p>
+      <h2 style={{ fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", fontFamily: "var(--font-display, Syne, sans-serif)", marginBottom: "0.4rem", lineHeight: 1.15 }}>{t}</h2>
+      <p style={{ color: "var(--text-dim, #666)", fontSize: "0.84rem", lineHeight: 1.5 }}>{s}</p>
     </div>
   );
 }
 function Label({ t }) {
-  return <div style={{ fontSize: "0.65rem", letterSpacing: "0.14em", color: "#333", textTransform: "uppercase", marginBottom: "1rem", fontFamily: "monospace" }}>{t}</div>;
+  return (
+    <div style={{ fontSize: "0.62rem", letterSpacing: "0.16em", color: "var(--text-ghost, #444)", textTransform: "uppercase", marginBottom: "1rem", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)" }}>
+      {t}
+    </div>
+  );
 }
 function Row({ n, t, small }) {
   return (
-    <div style={{ display: "flex", gap: "0.75rem", padding: small ? "0.35rem 0" : "0.6rem 0", borderBottom: "1px solid #0f0f0f" }}>
-      <span style={{ fontFamily: "monospace", color: "#2a2a2a", fontSize: small ? "0.68rem" : "0.73rem", flexShrink: 0, paddingTop: "0.05rem" }}>{n}</span>
-      <span style={{ color: "#777", fontSize: small ? "0.79rem" : "0.83rem", lineHeight: 1.65 }}>{t}</span>
+    <div style={{ display: "flex", gap: "0.75rem", padding: small ? "0.35rem 0" : "0.65rem 0", borderBottom: "1px solid #0f0f0f", alignItems: "flex-start" }}>
+      <span style={{ fontFamily: "var(--font-mono, monospace)", color: "#333", fontSize: small ? "0.68rem" : "0.72rem", flexShrink: 0, paddingTop: "0.05rem" }}>{n}</span>
+      <span style={{ color: "var(--text-dim, #666)", fontSize: small ? "0.79rem" : "0.83rem", lineHeight: 1.65 }}>{t}</span>
     </div>
   );
 }
